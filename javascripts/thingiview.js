@@ -47,6 +47,8 @@ Thingiview = function(containerId) {
   var rotate = false;
   var backgroundColor = '#606060';
   var objectMaterial = 'solid';
+  var objectMaterialURL = null;
+  var bitmapTexture = null;
   var objectColor = 0xffffff;
   var showPlane = true;
   var isWebGl = false;
@@ -514,6 +516,15 @@ Thingiview = function(containerId) {
     loadObjectGeometry();
   }
 
+  this.setObjectMaterialURL = function(theURL) {
+	objectMaterialURL = theURL;
+  }
+
+  this.setBitmapTexture = function(textureURL) {
+	bitmapTex = THREE.ImageUtils.loadTexture(textureURL);
+			texture.needsUpdate = true;
+}
+
   this.setBackgroundColor = function(color) {
     backgroundColor = color
     
@@ -702,7 +713,18 @@ Thingiview = function(containerId) {
 
   function loadObjectGeometry() {
     if (scene && geometry) {
-      if (objectMaterial == 'wireframe') {
+
+	  if (objectMaterial == 'bitmap' && objectMaterialURL != null) {
+		
+			var texture = THREE.ImageUtils.loadTexture(objectMaterialURL, {}, function() {
+			    renderer.render(scene, camera);
+			});
+//			var image = document.createElement( 'material_img' );
+//			image.src = objectMaterialURL;
+//			var texture = new THREE.Texture( image);
+			texture.needsUpdate = true;
+			material = new THREE.MeshBasicMaterial( { map: texture } );
+	} else if (objectMaterial == 'wireframe') {
         // material = new THREE.MeshColorStrokeMaterial(objectColor, 1, 1);
         material = new THREE.MeshBasicMaterial({color:objectColor,wireframe:true});
       } else {
@@ -734,9 +756,9 @@ Thingiview = function(containerId) {
         object.overdraw = true;
         object.doubleSided = true;
       }
-      
+
       object.updateMatrix();
-    
+
       targetXRotation = 0;
       targetYRotation = 0;
 
